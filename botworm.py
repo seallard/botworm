@@ -6,46 +6,49 @@ subreddit = reddit.subreddit("suggestmeabook")
 
 def extract_book(comment):
     """
-    Extracts all books from comment string.
+    Returns a list of all titles mentioned in a comment.
     """
     
-    comment = re.sub(r'[^a-zA-Z\d\s:]', '', comment)
-    word_list = comment.split(' ')
-    by_indices = [i for i, x in enumerate(word_list) if x == "by"]
+    pattern = re.compile(r"[\w']+|[.,!?;]+|\n\n")
+    words_and_punctuation = pattern.findall(comment)
+
+    by_indices = [i for i, x in enumerate(words_and_punctuation) if x == "by"]
     
-    # Check if any book is mentioned. 
     if len(by_indices) == 0:
         return None
     
-    # Extract each book.
     books = []
 
-    # Extract first book in comment (fix all later).
-    for index in [by_indices[0]]:
+    for index in by_indices:
+        author = " ".join(words_and_punctuation[index+1:index+3])
 
-        # Get the author.
-        author = " ".join(word_list[index+1:index+3])
+        title = ""
+        title_index = 1
+        limit = len(words_and_punctuation[:index])
 
-        # Get title. 
-        i = 1
-        limit = len(word_list[:index])
+        keywords = ['series','of','the', 'a', 'at', 'to'] # Common lower-case title words.
+        word = words_and_punctuation[index-title_index]
         
-        while word_list[index-i-1].istitle() and i < limit:
-            i += 1
-
-        title = " ".join(word_list[index-i:index])
-        title = re.sub(r"\n", "", title)
+        # Assume title consists of words before "by" that are uppercase or keywords.
+        while word.istitle() and title_index<=limit or word in keywords:
+            title = word + " " + title
+            title_index += 1
+            word = words_and_punctuation[index-title_index] 
         
-        books.append(title + " " + author)
+        if len(title)>1:
+            books.append(title + author)
+            print(title + author)
 
     return books
 
+book_list = []
 
-
-for submission in subreddit.hot(limit=2):
-
+# Iterate over comments and extract titles. 
+for submission in subreddit.hot(limit=3):
     for comment in submission.comments:
-        book = extract_book(comment.body.rstrip())
-        
-        if book != None:      
-            print(book)
+
+        if hasattr(comment, "body"):
+            books = extract_book(comment.body)
+            
+            if books != None and books != []:
+                book_list.append(books)
