@@ -47,7 +47,7 @@ def extract_book(comment):
 books_list = []
 
 # Iterate over comments and extract titles. 
-for submission in subreddit.hot(limit=3):
+for submission in subreddit.top(time_filter='week', limit=5):
     for comment in submission.comments:
 
         if hasattr(comment, "body"):
@@ -83,10 +83,12 @@ for books in books_list:
                 gr_title = child.find('best_book').findtext('title')
                 book_id =  child.find('best_book').findtext('id')
                 name = child.find('best_book').find('author').findtext('name')
+                link = "https://www.goodreads.com/book/show/"+book_id+".a"
 
-        if match:
-            link = "https://www.goodreads.com/book/show/"+book_id+".a"
-            goodreads_matches.append((gr_title, name, int(max_count), rating, link))
+        data = (gr_title, name, int(max_count), rating, link)
+        
+        if match and data not in goodreads_matches:
+            goodreads_matches.append(data)
             
             print("Search: " + query)   
             print("Match: " + gr_title + " by " + name)
