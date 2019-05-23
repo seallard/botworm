@@ -1,19 +1,19 @@
 import praw
-import re
 import requests
+import re
 import xml.etree.ElementTree as ET
-import goodreads_config
-import csv
 from operator import itemgetter
-import time
+import pickle
+import goodreads_config
+
 
 reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit("suggestmeabook")
 
 
-def extract_book(comment):
+def extract_books(comment):
     """
-    Returns a list of all titles mentioned in a comment.
+    Return list of all titles mentioned in a comment.
     """
 
     pattern = re.compile(r"[\w']+|[.,!?;]+|\n\n")
@@ -32,7 +32,6 @@ def extract_book(comment):
         title_index = 1
         limit = len(words_and_punctuation[:index])
 
-        # Common lower-case title words.
         keywords = ['series', 'of', 'the', 'a', 'at', 'to']
         word = words_and_punctuation[index-title_index]
 
@@ -48,75 +47,136 @@ def extract_book(comment):
     return books
 
 
-books_list = []
-post_titles = []
+def fetch_goodreads(mentioned_books):
+    """
+    Find titles on goodreads, return all matches sorted by number of reads.
+    """
 
-print("All search results will be saved to a csv file in this directory.")
-rating_limit = float(input("Enter rating cutoff [0-5]: "))
-time_limit = input(
-    "Enter top time filter [hour, day, week, month, year or all]: ")
-post_limit = int(input("Enter number of posts to filter: "))
+    print("Collecting Goodreads data...")
+    print("Books found in comments: {}".format(sum([len(x) for x in mentioned_books])))
 
-# Iterate over comments and extract titles.
-for submission in subreddit.top(time_filter=time_limit, limit=post_limit):
-    post_titles.append(submission.title)
-    print("Post title: " + " " + submission.title)
-    for comment in submission.comments:
+    base_url = "https://www.goodreads.com/search/index.xml?key=" + goodreads_config.api_key + "&q="
+    goodreads_matches = []
+    rating_limit = 3.0
+    reads_limit = 100
+    titles = []
 
-        if hasattr(comment, "body"):
-            books = extract_book(comment.body)
+    for books in mentioned_books:
+        for book in books:
 
-            if books is not None and books != []:
-                books_list.append(books)
+            title, author = book
+            query = title + author
 
-base_url = "https://www.goodreads.com/search/index.xml?key=" + \
-    goodreads_config.api_key + "&q="
-goodreads_matches = []
+            response = requests.get(base_url + query)
+            root = ET.fromstring(response.content)
 
-# Iterate over extracted titles and search goodreads.
-for books in books_list:
-    for book in books:
+            max_reads = 0
+            match = False
 
-        title, author = book
-        query = title + author
+            for child in root.iter('work'):
+                reads = int(child.findtext('ratings_count'))
 
-        response = requests.get(base_url + query)
-        root = ET.fromstring(response.content)
+                if reads >= max_reads:
 
-        max_count = 0
-        match = False
+                    match = True
 
-        for child in root.iter('work'):
-            count = int(child.findtext('ratings_count'))
+                    max_reads = reads
+                    rating = child.findtext('average_rating')
 
-            if count >= max_count:
-                match = True
-                max_count = count
-                rating = child.findtext('average_rating')
-                year = child.findtext('original_publication_year')
-                gr_title = child.find('best_book').findtext('title')
-                book_id = child.find('best_book').findtext('id')
-                name = child.find('best_book').find('author').findtext('name')
-                link = "https://www.goodreads.com/book/show/"+book_id+".a"
+                    gr_title = child.find('best_book').findtext(
+                        'title').split("(")[0].split(":")[0].split(",")[0]
+                    author = child.find('best_book').find(
+                        'author').findtext('name')
 
-        data = (gr_title, name, int(max_count), rating, link)
+                    link = "https://www.goodreads.com/book/title?id=" + \
+                        gr_title.replace(" ", "%2B")
 
-        if match and data not in goodreads_matches and float(rating) > rating_limit:
-            goodreads_matches.append(data)
+            if match:
+                data = (gr_title, author, int(max_reads), rating, link)
 
-            print("Search: " + query)
-            print("Match: " + gr_title + " by " + name)
-            print("Number of reads: " + str(max_count))
-            print("--------")
+                if gr_title not in titles and float(rating) > rating_limit and max_reads > reads_limit:
+                    print(gr_title)
 
-sorted_books = sorted(goodreads_matches, key=itemgetter(2), reverse=True)
-file_name = time.strftime("%Y%m%d")
-with open(file_name, "w", newline='') as f:
+                    goodreads_matches.append(data)
+                    titles.append(gr_title)
 
-    f.write("Title | Author | Reads | Rating | Link\n")
-    f.write(":--|:--|:--|:--|:--\n")
+    sorted_books = sorted(goodreads_matches, key=itemgetter(2), reverse=True)
+    print("Books found on goodreads: {}".format(len(sorted_books)))
+
+    return sorted_books
+
+
+def create_comments(sorted_books):
+    """
+    Creates comments (max 10000 chars) of titles in markdown format.
+    """
+
+    comments = []
+    comment = ""
+    message = "Some of the books mentioned in this thread on Goodreads:\n\n"
+    table_header = "Title | Author | Reads | Rating\n :--|:--|:--|:--|:--\n"
+
+    comment += message + table_header
 
     for book in sorted_books:
+
+        if len(comment) > 9750:  # 10 000 char/comment limit.
+            comments.append(comment)
+            comment = ""
+            comment += table_header
+
         title, author, reads, rating, link = book
-        f.write(("{} | {} | {} | {} | [goodreads]({})\n").format(
-            title, author, str(reads), rating, link))
+        row = ("[{}]({}) | {} | {} | {}\n").format(
+            title, link, author, str(reads), rating)
+        comment += row
+
+    comments.append(comment)
+
+    return comments
+
+
+def main():
+
+    try:
+        with open('post_ids', 'rb') as f:
+            post_ids = pickle.load(f)
+
+    except:
+        post_ids = []
+
+    time_limit = "month"
+    post_limit = 10
+
+    for submission in subreddit.top(time_filter=time_limit, limit=post_limit):
+
+        print(submission.title)
+
+        post_id = submission.id
+        mentioned_books = []
+
+        if post_id not in post_ids and submission.num_comments > 95 and not submission.archived:
+
+            post_ids.append(post_id)
+
+            for comment in submission.comments.list():
+                if hasattr(comment, "body"):
+
+                    books = extract_books(comment.body)
+
+                    if books != None and books != []:
+                        mentioned_books.append(books)
+
+        if mentioned_books not in [None, []]:
+
+            sorted_books = fetch_goodreads(mentioned_books)
+            comments = create_comments(sorted_books)
+
+            for comment in comments:
+                submission = submission.reply(comment)
+                print("Posted comment...")
+
+    with open('post_ids', 'wb') as f:
+        pickle.dump(post_ids, f)
+
+
+main()
