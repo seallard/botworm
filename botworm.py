@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from operator import itemgetter
 import pickle
 import goodreads_config
-
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit("suggestmeabook")
@@ -130,7 +130,7 @@ def create_comments(sorted_books):
             comment += table_header
             
         title, author, reads, rating, link, redditor = book
-        row = ("[{}]({}) | {} | {} | {} | {}\n").format(title, link, author, str(reads), rating, redditor)
+        row = ("[{}]({}) | {} | {} | {} | {}\n").format(title, link, author, str(reads).encode('utf-8'), rating, redditor)
         
         comment += row
         
@@ -148,24 +148,25 @@ def main():
 
     except:
         post_ids = []
-    
 
     time_limit = "day"
-    post_limit = 10
+    post_limit = 20
 
-    for submission in subreddit.hot(limit=post_limit):
+    for submission in subreddit.top(time_filter=time_limit, limit=post_limit):
 
         post_id = submission.id
-        print(post_id)
-        print(submission.title)
         mentioned_books = []
         users = []
         comment_ids = []
         
         
-        if post_id not in post_ids and submission.num_comments > 40 and not submission.archived:
+        if post_id not in post_ids and submission.num_comments > 35 and not submission.archived:
 
             post_ids.append(post_id)
+            
+            with open('post_ids', 'wb') as f:
+                pickle.dump(post_ids, f)
+            
             
             for comment in submission.comments.list():
                 
@@ -173,7 +174,7 @@ def main():
                     
                     books = extract_books(comment.body)
                     
-                    if books not in [None, []]:
+                    if books != [] and books != None:
                         
                         mentioned_books.append(books)
                         users.append(comment.author)
@@ -188,10 +189,11 @@ def main():
             for comment in comments:
                 submission = submission.reply(comment)
                 print("Posted comment...")
-    
+        
+        
     with open('post_ids', 'wb') as f:
         pickle.dump(post_ids, f)
 
-
-if __name__ == "__main__":
-    main()
+scheduler = BlockingScheduler()
+scheduler.add_job(main, 'interval', hours=3)
+scheduler.start()

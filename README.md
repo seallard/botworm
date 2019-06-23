@@ -4,5 +4,3 @@ The lists are posted as comments on Reddit by [u/Guardian_of_Bookworm](https://w
 
 ## Todo
 * Improve logic to find more recommendations in comments.
-* Deploy?
-* Create list on Goodreads instead?
