@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from operator import itemgetter
 import pickle
 import goodreads_config
-from apscheduler.schedulers.blocking import BlockingScheduler
+import time
 
 reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit("suggestmeabook")
@@ -117,7 +117,7 @@ def create_comments(sorted_books):
 
     comments = []
     comment = ""
-    message = "Some of the books mentioned in this thread on Goodreads:\n\n"
+    message = "Hi, I'm a bot! Here are some of the books mentioned in this thread on Goodreads:\n\n"
     table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
 
     comment += message + table_header
@@ -130,7 +130,7 @@ def create_comments(sorted_books):
             comment += table_header
             
         title, author, reads, rating, link, redditor = book
-        row = ("[{}]({}) | {} | {} | {} | {}\n").format(title, link, author, str(reads).encode('utf-8'), rating, redditor)
+        row = ("[{}]({}) | {} | {} | {} | {}\n").format(title, link, author, str(reads), rating, redditor)
         
         comment += row
         
@@ -193,7 +193,8 @@ def main():
         
     with open('post_ids', 'wb') as f:
         pickle.dump(post_ids, f)
+    
 
-scheduler = BlockingScheduler()
-scheduler.add_job(main, 'interval', hours=3)
-scheduler.start()
+while True:
+    main()
+    time.sleep(1000)
