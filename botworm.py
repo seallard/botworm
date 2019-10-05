@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from operator import itemgetter
 import pickle
 import goodreads_config
-import time
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit("suggestmeabook")
@@ -51,8 +51,6 @@ def fetch_goodreads(mentioned_books, users, comment_ids, post_id):
     """
     Find titles on goodreads, return all matches sorted by number of reads.
     """
-    
-    print("Collecting Goodreads data...")
 
     base_url = "https://www.goodreads.com/search/index.xml?key=" + goodreads_config.api_key + "&q="
 
@@ -97,16 +95,10 @@ def fetch_goodreads(mentioned_books, users, comment_ids, post_id):
                 data = (gr_title, author, max_reads, rating, link, comment)
 
                 if gr_title not in titles and float(rating) > rating_limit and max_reads > reads_limit:
-                    print(gr_title)
-
                     goodreads_matches.append(data)
                     titles.append(gr_title)
 
     sorted_books = sorted(goodreads_matches, key=itemgetter(3), reverse=True)
-
-    print("Books found in comments: {}".format(sum([len(x) for x in mentioned_books])))
-    print("Books found on goodreads: {}".format(len(sorted_books)))
-
     return sorted_books
 
 
@@ -134,9 +126,7 @@ def create_comments(sorted_books):
         
         comment += row
         
-    
     comments.append(comment)
-
     return comments
 
 
@@ -149,8 +139,8 @@ def main():
     except:
         post_ids = []
 
-    time_limit = "day"
-    post_limit = 20
+    time_limit = "week"
+    post_limit = 50
 
     for submission in subreddit.top(time_filter=time_limit, limit=post_limit):
 
@@ -160,41 +150,31 @@ def main():
         comment_ids = []
         
         
-        if post_id not in post_ids and submission.num_comments > 35 and not submission.archived:
-
-            post_ids.append(post_id)
-            
-            with open('post_ids', 'wb') as f:
-                pickle.dump(post_ids, f)
-            
+        if post_id not in post_ids and submission.num_comments > 100 and not submission.archived:
             
             for comment in submission.comments.list():
-                
+
                 if hasattr(comment, "body"):
-                    
                     books = extract_books(comment.body)
-                    
+
                     if books != [] and books != None:
-                        
                         mentioned_books.append(books)
                         users.append(comment.author)
                         comment_ids.append(comment.id)
 
-        if mentioned_books not in [None, []]:
-
+        if mentioned_books not in [None, []] and len(mentioned_books) > 10:
             sorted_books = fetch_goodreads(mentioned_books, users, comment_ids, post_id)
             comments = create_comments(sorted_books)
-            
 
             for comment in comments:
                 submission = submission.reply(comment)
-                print("Posted comment...")
-        
-        
-    with open('post_ids', 'wb') as f:
-        pickle.dump(post_ids, f)
+
+            post_ids.append(post_id)
+            with open('post_ids', 'wb') as f:
+                pickle.dump(post_ids, f)
     
 
-while True:
-    main()
-    time.sleep(1000)
+if __name__ == "__main__":
+    scheduler = BlockingScheduler()
+    scheduler.add_job(main, 'interval', hours=2)
+    scheduler.start()
