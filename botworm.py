@@ -87,8 +87,9 @@ def fetch_goodreads(mentioned_books, users, comment_ids, post_id):
 
                     gr_title = child.find('best_book').findtext('title').split("(")[0].split(":")[0].split(",")[0]
                     author = child.find('best_book').find('author').findtext('name')
+                    book_id = child.find('best_book').findtext('id')
 
-                    link = "https://www.goodreads.com/book/title?id=" + gr_title.replace(" ", "%2B")
+                    link = "https://www.goodreads.com/book/show" + book_id
                     comment = "[{}](https://www.reddit.com/comments/{}/_/{}/)".format(user, post_id, comment_id)
 
             if match:
