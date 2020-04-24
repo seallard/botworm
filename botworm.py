@@ -1,45 +1,85 @@
 import praw
 import requests
-import re
 import xml.etree.ElementTree as ET
 from operator import itemgetter
 import pickle
 import goodreads_config
-from apscheduler.schedulers.blocking import BlockingScheduler
+import schedule
+import re
 
 reddit = praw.Reddit('bot1')
 subreddit = reddit.subreddit("suggestmeabook")
 
 
-def extract_books(comment):
+def clean_comment(comment):
     """
-    Return list of all titles mentioned in a comment.
+    Remove punctuation and newline chars.
     """
 
     pattern = re.compile(r"[\w']+|[.,!?;]+|\n\n")
-    words_and_punctuation = pattern.findall(comment)
-    by_indices = [i for i, x in enumerate(words_and_punctuation) if x == "by"]
+    return pattern.findall(comment)
 
+
+def find_by_indices(clean_comment):
+    """
+    Return list of indices at which "by" occurs.
+    """
+
+    by_indices = [i for i, x in enumerate(clean_comment) if x == "by"]
+    return by_indices
+
+
+def is_keyword(word):
+    """
+    Check if the word is a common lowercase word in a title.
+    """
+
+    keywords = ['of', 'the', 'a', 'at', 'to']
+    return word in keywords
+
+
+def extract_author(comment, by_index):
+    """
+    Return author from comment given index of "by".
+    It is assumed that the author consists of the two preceeding words.
+    """
+
+    return " ".join(comment[by_index+1:by_index+3])
+
+
+def extract_title(comment, by_index):
+
+    title = ""
+    title_index = 1
+    word = comment[by_index-title_index]
+    limit = len(comment[:by_index])
+
+    while title_index <= limit and word.istitle() or is_keyword(word):
+        title = word + " " + title
+        title_index += 1
+        word = comment[by_index-title_index]
+
+    return title
+
+
+def extract_books(comment):
+    """
+    Return list of tuples of the format (title, author) of all books
+    found in the comment.
+    """
+
+    comment = clean_comment(comment)
+    by_indices = find_by_indices(comment)
+
+    # No titles of expected format found.
     if len(by_indices) == 0:
         return None
 
     books = []
 
     for index in by_indices:
-        author = " ".join(words_and_punctuation[index+1:index+3])
-
-        title = ""
-        title_index = 1
-        limit = len(words_and_punctuation[:index])
-
-        keywords = ['series', 'of', 'the', 'a', 'at', 'to']
-        word = words_and_punctuation[index-title_index]
-
-        # Assume title consists of uppercase/keywords before "by".
-        while title_index <= limit and word.istitle() or word in keywords:
-            title = word + " " + title
-            title_index += 1
-            word = words_and_punctuation[index-title_index]
+        author = extract_author(comment, index)
+        title = extract_title(comment, index)
 
         if len(title) > 1 and len(author) > 1:
             books.append((title, author))
@@ -81,7 +121,7 @@ def fetch_goodreads(mentioned_books, users, comment_ids, post_id):
                 if reads >= max_reads:
 
                     match = True
-                    
+
                     max_reads = reads
                     rating = child.findtext('average_rating')
 
@@ -121,12 +161,12 @@ def create_comments(sorted_books):
             comments.append(comment)
             comment = ""
             comment += table_header
-            
+
         title, author, reads, rating, link, redditor = book
         row = ("[{}]({}) | {} | {} | {} | {}\n").format(title, link, author, str(reads), rating, redditor)
-        
+
         comment += row
-        
+
     comments.append(comment)
     return comments
 
@@ -149,10 +189,10 @@ def main():
         mentioned_books = []
         users = []
         comment_ids = []
-        
-        
+
+
         if post_id not in post_ids and submission.num_comments > 100 and not submission.archived:
-            
+
             for comment in submission.comments.list():
 
                 if hasattr(comment, "body"):
@@ -162,6 +202,7 @@ def main():
                         mentioned_books.append(books)
                         users.append(comment.author)
                         comment_ids.append(comment.id)
+        print(mentioned_books)
 
         if mentioned_books not in [None, []] and len(mentioned_books) > 10:
             sorted_books = fetch_goodreads(mentioned_books, users, comment_ids, post_id)
@@ -171,11 +212,8 @@ def main():
                 submission = submission.reply(comment)
 
             post_ids.append(post_id)
-            with open('post_ids', 'wb') as f:
-                pickle.dump(post_ids, f)
-    
+            #with open('post_ids', 'wb') as f:
+            #   pickle.dump(post_ids, f)
 
 if __name__ == "__main__":
-    scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'interval', hours=2)
-    scheduler.start()
+    main()
