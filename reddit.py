@@ -1,0 +1,57 @@
+import praw
+import pickle
+from comment import Comment
+
+
+class Reddit:
+
+    def __init__(self, user_agent, subreddit):
+        self.client = praw.Reddit(user_agent)
+        self.subreddit = client.subreddit(subreddit)
+        self.post_ids = self.__get_commented_posts()
+
+        self.time_filter = "week"
+        self.post_limit = 50
+        self.comment_threshold = 50
+
+
+    def get_posts(self):
+        posts = []
+        for post in subreddit.top(time_filter=time_filter, limit=post_limit):
+            if self.__worth_checking(post):
+                posts.append(post)
+        return posts
+
+
+    def get_comments(self, post):
+        comments = []
+        for comment in post.comments.list():
+            if hasattr(comment, "body"):
+                comments.append(Comment(comment))
+        return comments
+
+
+    def post_comments(self, post, comments):
+        post_id = post.id
+        for comment in comments:
+            post = post.reply(comment)
+        self.__update_commented_posts(post_id)
+
+
+    def __get_commented_posts(self):
+        try:
+            with open ('post_ids', 'rb') as f:
+                post_ids = pickle.load(f)
+                return post_ids
+        except:
+            return []
+
+
+    def __update_commented_posts(self, post_id):
+            post_ids.append(post_id)
+            with open('post_ids', 'wb') as f:
+                pickle.dump(post_ids, f)
+
+
+    def __worth_checking(self, post):
+        return post.id not in post_ids and post.num_comments > comment_threshold
