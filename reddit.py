@@ -7,7 +7,7 @@ class Reddit:
 
     def __init__(self, user_agent, subreddit):
         self.client = praw.Reddit(user_agent)
-        self.subreddit = client.subreddit(subreddit)
+        self.subreddit = self.client.subreddit(subreddit)
         self.post_ids = self.__get_commented_posts()
 
         self.time_filter = "week"
@@ -17,7 +17,7 @@ class Reddit:
 
     def get_posts(self):
         posts = []
-        for post in subreddit.top(time_filter=time_filter, limit=post_limit):
+        for post in self.subreddit.top(time_filter=self.time_filter, limit=self.post_limit):
             if self.__worth_checking(post):
                 posts.append(post)
         return posts
@@ -54,4 +54,4 @@ class Reddit:
 
 
     def __worth_checking(self, post):
-        return post.id not in post_ids and post.num_comments > comment_threshold
+        return post.id not in self.post_ids and post.num_comments > self.comment_threshold
