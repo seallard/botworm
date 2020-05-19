@@ -1,4 +1,5 @@
 import requests
+from time import sleep
 import xmltodict
 from json import loads, dumps
 import goodreads_config
@@ -22,14 +23,18 @@ class Goodreads:
 
         book_dict = self.__extract_best_hit(r.content)
         book = self.__create_book_object(book_dict)
+        sleep(1)
         return book
 
 
     def __extract_best_hit(self, xml):
         """ The API returns the books by descending popularity. """
         json = self.__get_content(xml)
-        book_dict = self.__extract_books(json)[0] # Get the most popular book
-        return book_dict
+        hits = self.__extract_books(json)
+
+        if type(hits) == list:
+            return hits[0] # Get the most popular book if more than one hit
+        return hits
 
 
     def __get_content(self, xml):
