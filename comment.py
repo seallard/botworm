@@ -36,17 +36,24 @@ class Comment:
 
 
     def __extract_author(self, index):
-        first_name = self.clean_text[index+1]
-        last_name = self.clean_text[index+2]
         author = ""
 
-        if first_name.istitle():
-            author += first_name
+        if self.__valid_index(index+1):
+            first_name = self.clean_text[index+1]
 
-        if last_name.istitle():
-            author += " " + last_name
+            if first_name.istitle():
+                author += first_name
 
+        if self.__valid_index(index+2):
+            last_name = self.clean_text[index+2]
+
+            if last_name.istitle():
+                author += " " + last_name
         return author
+
+
+    def __valid_index(self, index):
+        return index < len(self.clean_text)
 
 
     def __extract_title(self, index):
