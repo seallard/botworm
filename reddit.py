@@ -13,6 +13,7 @@ class Reddit:
         self.time_filter = "week"
         self.post_limit = 50
         self.comment_threshold = 50
+        self.char_limit = 9800
 
 
     def get_posts(self):
@@ -55,3 +56,25 @@ class Reddit:
 
     def __worth_checking(self, post):
         return post.id not in self.post_ids and post.num_comments > self.comment_threshold
+
+
+    def create_table(self, recommendations):
+
+        comments = []
+        table = ""
+        message = "Hi, I'm a bot! Here are some of the books mentioned in this thread on Goodreads:\n\n"
+        table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
+
+        table += message + table_header
+
+        for recommendation in recommendations:
+
+            if len(table) > self.char_limit:
+                comments.append(table)
+                table = ""
+                table += table_header
+
+            table += recommendation.to_string()
+
+        comments.append(table)
+        return comments
