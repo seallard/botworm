@@ -17,24 +17,39 @@ class Goodreads:
         """ Query the search endpoint of the Goodreads API. """
         search_url = self.base + "/search/index.xml?key=" + self.token + "&q=" + query
         r = requests.get(search_url)
+        sleep(1)
 
         if r.status_code != 200:
             raise Exception(f"GET query failed: {r.status_code}")
 
-        book_dict = self.__extract_best_hit(r.content)
-        book = self.__create_book_object(book_dict)
-        sleep(1)
+        json = self.__get_content(r.content)
+        best_hit = self.__get_best_hit(json)
+
+        if best_hit == None:
+            print(f"No hit for query: {query}")
+            return None
+
+        book = self.__create_book_object(best_hit)
         return book
 
 
-    def __extract_best_hit(self, xml):
-        """ The API returns the books by descending popularity. """
-        json = self.__get_content(xml)
-        hits = self.__extract_books(json)
+    def __get_best_hit(self, json):
+        number_of_hits = self.__number_of_hits(json)
 
-        if type(hits) == list:
-            return hits[0] # Get the most popular book if more than one hit
-        return hits
+        if number_of_hits == 0 or number_of_hits == None:
+            return None
+
+        if number_of_hits == 1:
+            book_dict = self.__extract_books(json)
+
+        if number_of_hits > 1:
+            book_dict = self.__extract_books(json)[0]
+
+        return book_dict
+
+
+    def __number_of_hits(self, json):
+        return int(json["GoodreadsResponse"]["search"]["total-results"])
 
 
     def __get_content(self, xml):
