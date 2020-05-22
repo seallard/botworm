@@ -76,4 +76,4 @@ class Comment:
 
 
     def __create_url(self):
-        return f"https://www.reddit.com/comments/{self.post_id}/_/{self.comment_id}/)"
+        return f"https://www.reddit.com/comments/{self.post_id}/_/{self.comment_id}/"
