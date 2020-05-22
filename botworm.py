@@ -22,5 +22,6 @@ if __name__ == "__main__":
                 if book != None:
                     recommendations.append(Recommendation(book, comment))
 
+        recommendations.sort(key=lambda x: x.book.rating, reverse=True)
         tables = reddit.create_table(recommendations)
         reddit.post_comments(post, tables)
