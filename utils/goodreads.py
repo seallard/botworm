@@ -2,14 +2,14 @@ import requests
 from time import sleep
 import xmltodict
 from json import loads, dumps
-import goodreads_config
-from book import Book
+import configs.goodreads_config
+from objects.book import Book
 
 
 class Goodreads:
 
     def __init__(self):
-        self.token = goodreads_config.api_key
+        self.token = configs.goodreads_config.api_key
         self.base = "https://www.goodreads.com"
 
 

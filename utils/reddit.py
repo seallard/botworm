@@ -1,6 +1,6 @@
 import praw
 import pickle
-from comment import Comment
+from objects.comment import Comment
 
 
 class Reddit:
@@ -49,9 +49,9 @@ class Reddit:
 
 
     def __update_commented_posts(self, post_id):
-            post_ids.append(post_id)
+            self.post_ids.append(post_id)
             with open('post_ids', 'wb') as f:
-                pickle.dump(post_ids, f)
+                pickle.dump(self.post_ids, f)
 
 
     def __worth_checking(self, post):
