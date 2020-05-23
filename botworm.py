@@ -4,8 +4,7 @@ from utils.book_title_parser import BookTitleParser
 from models.recommendation import Recommendation
 
 
-if __name__ == "__main__":
-
+def main():
     reddit = Reddit("bot1", "suggestmeabook")
     goodreads = Goodreads()
     title_parser = BookTitleParser()
@@ -28,3 +27,7 @@ if __name__ == "__main__":
         recommendations.sort(key=lambda x: x.book.rating, reverse=True)
         tables = reddit.create_table(recommendations)
         reddit.post_comments(post, tables)
+
+
+if __name__ == "__main__":
+    main()
