@@ -2,11 +2,11 @@ import re
 
 class Comment:
 
-    def __init__(self, comment):
-        self.text = comment.body
-        self.author = comment.author
-        self.comment_id = comment.id
-        self.post_id = comment.submission.id
+    def __init__(self, text, author, comment_id, post_id):
+        self.text = text
+        self.author = author
+        self.comment_id = comment_id
+        self.post_id = post_id
         self.clean_text = self.__remove_punctuation()
         self.url = self.__create_url()
 

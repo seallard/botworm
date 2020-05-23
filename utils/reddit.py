@@ -27,8 +27,17 @@ class Reddit:
     def get_comments(self, post):
         comments = []
         for comment in post.comments.list():
+
             if hasattr(comment, "body"):
-                comments.append(Comment(comment))
+
+                text = comment.body
+                author = comment.author
+                comment_id = comment.id
+                post_id = comment.submission.id
+
+                comment = Comment(text, author, comment_id, post_id)
+                comments.append(comment)
+
         return comments
 
 
