@@ -3,7 +3,7 @@ from time import sleep
 import xmltodict
 from json import loads, dumps
 import configs.goodreads_config
-from objects.book import Book
+from models.book import Book
 
 
 class Goodreads:

@@ -1,6 +1,6 @@
 from utils.reddit import Reddit
 from utils.goodreads import Goodreads
-from objects.recommendation import Recommendation
+from models.recommendation import Recommendation
 
 
 if __name__ == "__main__":

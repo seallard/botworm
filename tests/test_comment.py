@@ -1,5 +1,5 @@
 import pytest
-from objects.comment import Comment
+from models.comment import Comment
 
 @pytest.fixture
 def single_title_comment():

@@ -1,6 +1,6 @@
 import praw
 import pickle
-from objects.comment import Comment
+from models.comment import Comment
 
 
 class Reddit:

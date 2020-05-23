@@ -1,6 +1,6 @@
 import pytest
 import requests
-from objects.book import Book
+from models.book import Book
 
 @pytest.fixture
 def example_book():
