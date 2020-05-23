@@ -20,7 +20,7 @@ class Comment:
             book_title = self.__extract_title(index)
 
             if len(book_title) > 1 and len(book_author) > 1:
-                books.append(book_title + " " + book_author)
+                books.append(book_title + book_author)
         return books
 
     def __remove_punctuation(self):
