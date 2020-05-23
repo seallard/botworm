@@ -10,11 +10,10 @@ class Goodreads:
 
     def __init__(self):
         self.token = configs.goodreads_config.api_key
-        self.base = "https://www.goodreads.com"
 
     def get_book(self, query):
         """ Query the search endpoint of the Goodreads API. """
-        search_url = self.base + "/search/index.xml?key=" + self.token + "&q=" + query
+        search_url = "https://www.goodreads.com/search/index.xml?key=" + self.token + "&q=" + query
         r = requests.get(search_url)
         sleep(1)
 
