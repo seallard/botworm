@@ -15,14 +15,12 @@ class Reddit:
         self.comment_threshold = 50
         self.char_limit = 9800
 
-
     def get_posts(self):
         posts = []
         for post in self.subreddit.top(time_filter=self.time_filter, limit=self.post_limit):
             if self.__worth_checking(post):
                 posts.append(post)
         return posts
-
 
     def get_comments(self, post):
         comments = []
@@ -37,9 +35,7 @@ class Reddit:
 
                 comment = Comment(text, author, comment_id, post_id)
                 comments.append(comment)
-
         return comments
-
 
     def post_comments(self, post, comments):
         post_id = post.id
@@ -47,31 +43,27 @@ class Reddit:
             post = post.reply(comment)
         self.__update_commented_posts(post_id)
 
-
     def __get_commented_posts(self):
         try:
-            with open ('post_ids', 'rb') as f:
+            with open('post_ids', 'rb') as f:
                 post_ids = pickle.load(f)
                 return post_ids
         except:
             return []
 
-
     def __update_commented_posts(self, post_id):
-            self.post_ids.append(post_id)
-            with open('post_ids', 'wb') as f:
-                pickle.dump(self.post_ids, f)
-
+        self.post_ids.append(post_id)
+        with open('post_ids', 'wb') as f:
+            pickle.dump(self.post_ids, f)
 
     def __worth_checking(self, post):
         return post.id not in self.post_ids and post.num_comments > self.comment_threshold
-
 
     def create_table(self, recommendations):
 
         comments = []
         table = ""
-        message = "Hi, I'm a bot! Here are some of the books mentioned in this thread on Goodreads:\n\n"
+        message = "Here are some of the books mentioned in this thread on Goodreads:\n\n"
         table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
 
         table += message + table_header

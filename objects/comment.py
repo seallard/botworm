@@ -1,5 +1,6 @@
 import re
 
+
 class Comment:
 
     def __init__(self, text, author, comment_id, post_id):
@@ -9,7 +10,6 @@ class Comment:
         self.post_id = post_id
         self.clean_text = self.__remove_punctuation()
         self.url = self.__create_url()
-
 
     def get_mentioned_books(self):
         """ Extract titles from comment. """
@@ -23,17 +23,14 @@ class Comment:
                 books.append(book_title + " " + book_author)
         return books
 
-
     def __remove_punctuation(self):
         pattern = re.compile(r"[\w']+|[.,!?;]+|\n\n")
         return pattern.findall(self.text)
-
 
     def __find_by_indices(self):
         """ Return list of indices at which "by" occurs. """
         by_indices = [i for i, x in enumerate(self.clean_text) if x == "by"]
         return by_indices
-
 
     def __extract_author(self, index):
         author = ""
@@ -51,10 +48,8 @@ class Comment:
                 author += " " + last_name
         return author
 
-
     def __valid_index(self, index):
         return index < len(self.clean_text)
-
 
     def __extract_title(self, index):
         title = ""
@@ -69,11 +64,9 @@ class Comment:
 
         return title
 
-
     def __is_keyword(self, word):
         keywords = ['of', 'the', 'a', 'at', 'to']
         return word in keywords
-
 
     def __create_url(self):
         return f"https://www.reddit.com/comments/{self.post_id}/_/{self.comment_id}/"

@@ -9,7 +9,6 @@ class Book():
         self.id = goodreads_id
         self.url = self.__create_url()
 
-
     def __format_title(self, title):
         """ Remove series name and subtitle. """
         new_title = title.split("(")[0].split(":")[0].split(",")[0].split("by")[0]
