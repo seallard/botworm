@@ -21,7 +21,7 @@ def main():
                 print(title)
                 book = goodreads.get_book(title)
 
-                if book != None:
+                if book is not None:
                     recommendations.append(Recommendation(book, comment))
 
         recommendations.sort(key=lambda x: x.book.rating, reverse=True)
