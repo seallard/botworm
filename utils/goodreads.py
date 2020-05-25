@@ -10,6 +10,7 @@ class Goodreads:
 
     def __init__(self):
         self.token = configs.goodreads_config.api_key
+        self.reads_threshold = 50
 
     def get_book(self, query):
         """ Query the search endpoint of the Goodreads API. """
@@ -31,21 +32,26 @@ class Goodreads:
         return book
 
     def __get_best_hit(self, json):
+        """ Extract the most popular hit. """
         number_of_hits = self.__number_of_hits(json)
 
-        if number_of_hits == 0 or number_of_hits is None:
+        if number_of_hits == 0:
             return None
 
-        if number_of_hits == 1:
-            book_dict = self.__extract_books(json)
+        book = self.__extract_books(json)
 
         if number_of_hits > 1:
-            book_dict = self.__extract_books(json)[0]
+            book = book[0] # Goodreads sorts the hits by popularity
 
-        return book_dict
+        if self.__valid(book):
+            return book
 
     def __number_of_hits(self, json):
         return int(json["GoodreadsResponse"]["search"]["total-results"])
+
+    def __valid(self, book_dict):
+        count = int(book_dict["ratings_count"]["#text"])
+        return count > self.reads_threshold
 
     def __get_content(self, xml):
         """ Convert from xml to json. """
