@@ -1,6 +1,6 @@
 from models.recommendation import Recommendation
 
-class RecommendationTracker:
+class RecommendationLister:
 
     def __init__(self):
         self.__recommendations_dict = {}

@@ -1,7 +1,7 @@
 from utils.reddit import Reddit
 from utils.goodreads import Goodreads
 from utils.book_title_parser import BookTitleParser
-from utils.recommendation_tracker import RecommendationTracker
+from utils.recommendation_lister import RecommendationLister
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
     title_parser = BookTitleParser()
 
     for post in reddit.get_posts():
-        tracker = RecommendationTracker()
+        lister = RecommendationLister()
 
         for comment in reddit.get_comments(post):
             mentioned_books = title_parser.extract_titles(comment.text)
@@ -19,9 +19,9 @@ def main():
             for title in mentioned_books:
                 print(title)
                 book = goodreads.get_book(title)
-                tracker.add(book, comment)
+                lister.add(book, comment)
 
-        recommendations = tracker.get()
+        recommendations = lister.get()
         tables = reddit.create_table(recommendations)
         reddit.post_comments(post, tables)
 
