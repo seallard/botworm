@@ -10,7 +10,7 @@ class Book(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     author = Column(String)
-    comments = relationship("Comment", secondary=comments_books_association, backpopulates="books")
+    comments = relationship("Comment", secondary=comments_books_association, back_populates="books")
 
     def __init__(self, title, author, rating, count, goodreads_id):
         self.title = self.__format_title(title)

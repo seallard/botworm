@@ -7,9 +7,9 @@ from models.association_tables import comments_books_association
 class Comment(Base):
     __tablename__ = 'comments'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     text = Column(String)
-    books = relationship("Book", secondary=comments_books_association, backpopulates="comments")
+    books = relationship("Book", secondary=comments_books_association, back_populates="comments")
 
     def __init__(self, text, author, id, post_id):
         self.text = text
