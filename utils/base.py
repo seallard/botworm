@@ -1,19 +1,7 @@
-import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-class Database:
-    def __init__(self):
-        self.__connection = self.__connect()
-
-    def __connect(self):
-        connection = psycopg2.connect(user = "postgres",
-                                      password = "postgres",
-                                      host = "database",
-                                      port = "5432",
-                                      database = "postgres")
-        return connection
-
-    def update(self, book):
-        pass
-
-    def test(self):
-        print (self.__connection.get_dsn_parameters())
+Engine = create_engine('postgresql://usr:pass@localhost:5432/sqlalchemy')
+Session = sessionmaker(bind=Engine)
+Base = declarative_base()
