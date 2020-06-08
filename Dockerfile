@@ -1,5 +1,8 @@
-FROM python:3
+FROM python:3 as prepare
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+FROM prepare as prod
 WORKDIR /app
 COPY . .
-RUN pip install -r requirements.txt
 CMD [ "python", "./botworm.py" ]
