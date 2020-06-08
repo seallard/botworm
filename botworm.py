@@ -2,7 +2,7 @@ from utils.reddit import Reddit
 from utils.goodreads import Goodreads
 from utils.book_title_parser import BookTitleParser
 from utils.recommendation_lister import RecommendationLister
-from utils.database import Database
+from utils.recommendation_tracker import RecommendationTracker
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
     reddit = Reddit("bot1", "suggestmeabook")
     goodreads = Goodreads()
     title_parser = BookTitleParser()
-    database = Database()
+    tracker = RecommendationTracker()
 
     for post in reddit.get_posts():
         lister = RecommendationLister()
@@ -21,12 +21,13 @@ def main():
             for title in mentioned_books:
                 print(title)
                 book = goodreads.get_book(title)
+                tracker.update(book)
+                tracker.update(comment)
                 lister.add(book, comment)
-                database.test()
 
         recommendations = lister.get()
         tables = reddit.create_table(recommendations)
-        reddit.post_comments(post, tables)
+        #reddit.post_comments(post, tables)
 
 
 if __name__ == "__main__":
