@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, Date
 from sqlalchemy.orm import relationship
-from utils.database import Base
+from utils.base import Base
 from models.association_tables import comments_books_association
 
 

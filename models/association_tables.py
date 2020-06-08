@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, String, Integer, Date, ForeignKey
-from utils.database import Base
+from utils.base import Base
 
 comments_books_association = Table('comments_books', Base.metadata,
     Column('comment_id', Integer, ForeignKey('comments.id')),
