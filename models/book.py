@@ -1,5 +1,16 @@
+from sqlalchemy import Column, String, Integer, Date
+from sqlalchemy.orm import relationship
+from utils.database import Base
+from models.association_tables import comments_books_association
 
-class Book():
+
+class Book(Base):
+    __tablename__ = 'books'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    author = Column(String)
+    comments = relationship("Comment", secondary=comments_books_association, backpopulates="books")
 
     def __init__(self, title, author, rating, count, goodreads_id):
         self.title = self.__format_title(title)
