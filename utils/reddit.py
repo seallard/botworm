@@ -32,8 +32,9 @@ class Reddit:
                 author = comment.author
                 comment_id = comment.id
                 post_id = comment.submission.id
+                date = comment.created_utc
 
-                comment = Comment(text, author, comment_id, post_id)
+                comment = Comment(text, author, comment_id, post_id, date)
                 comments.append(comment)
         return comments
 
