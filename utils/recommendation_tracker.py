@@ -31,14 +31,6 @@ class RecommendationTracker:
         self.session.commit()
         self.session.close()
 
-
-    def track_book(self, book):
-        stmt = query().where(Book.id==book.id)
-        book_exists = self.session.query(stmt).scalar()
-
-        if not book_exists:
-            self.add(book)
-
     def date_of_most_recent_stored_comment(self, post_id):
         pass
 
