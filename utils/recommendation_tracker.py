@@ -11,12 +11,11 @@ class RecommendationTracker:
         self.session = session_factory()
 
     def add(self, data):
-        try:
-            self.session.add(data)
-            self.session.commit()
-            self.session.close()
-        except:
-            pass
+
+        self.session.add(data)
+        self.session.commit()
+        self.session.close()
+
 
     def track_post(self, post):
         post = RedditPost(post)
@@ -27,14 +26,14 @@ class RecommendationTracker:
             self.add(post)
 
     def track_comment(self, comment):
-        stmt = exists().where(Comment.id==comment.id)
-        comment_exists = self.session.query(stmt).scalar()
 
-        if not comment_exists:
-            self.add(comment)
+        self.session.merge(comment)
+        self.session.commit()
+        self.session.close()
+
 
     def track_book(self, book):
-        stmt = exists().where(Book.id==book.id)
+        stmt = query().where(Book.id==book.id)
         book_exists = self.session.query(stmt).scalar()
 
         if not book_exists:

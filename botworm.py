@@ -13,17 +13,20 @@ def main():
     tracker = RecommendationTracker()
 
     for post in reddit.get_posts():
+        tracker.track_post(post)
         lister = RecommendationLister()
 
         for comment in reddit.get_comments(post):
             mentioned_books = title_parser.extract_titles(comment.text)
 
             for title in mentioned_books:
-                print(title)
                 book = goodreads.get_book(title)
-                tracker.update(book)
-                tracker.update(comment)
-                lister.add(book, comment)
+
+                if book:
+                    comment.books.append(book)
+
+            tracker.track_comment(comment)
+
 
         recommendations = lister.get()
         tables = reddit.create_table(recommendations)
