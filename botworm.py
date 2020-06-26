@@ -7,7 +7,7 @@ from utils.recommendation_tracker import RecommendationTracker
 
 def main():
 
-    reddit = Reddit("bot1", "suggestmeabook")
+    reddit = Reddit()
     goodreads = Goodreads()
     title_parser = BookTitleParser()
     tracker = RecommendationTracker()

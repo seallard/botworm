@@ -1,0 +1,16 @@
+{
+    "goodreads_api_key" : "api key",
+    "read_threshold" : 50,
+
+    "client_id" : "client_id",
+    "secret" : "secret",
+    "user_agent" : "bot1",
+    "username" : "Guardian_of_Bookworm",
+    "password" : "password",
+    "subreddit" : "suggestmeabook",
+
+    "time_filter" : "week",
+    "post_limit" : 50,
+    "comment_threshold" : 50,
+    "char_limit" : 9800
+}

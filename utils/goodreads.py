@@ -1,16 +1,15 @@
 import requests
 from time import sleep
 import xmltodict
-from json import loads, dumps
-import configs.goodreads_config
+from json import loads, dumps, load
 from models.book import Book
+
 
 
 class Goodreads:
 
     def __init__(self):
-        self.token = configs.goodreads_config.api_key
-        self.reads_threshold = 50
+        self.__read_config()
 
     def get_book(self, query):
         """ Query the search endpoint of the Goodreads API. """
@@ -71,3 +70,9 @@ class Goodreads:
         count = int(book_dict["ratings_count"]["#text"])
         goodreads_id = int(book_dict["best_book"]["id"]["#text"])
         return Book(title, author, rating, count, goodreads_id)
+
+    def __read_config(self):
+        with open('configs/config.json') as config_file:
+            config = load(config_file)
+            self.token = config["goodreads_api_key"]
+            self.reads_threshold = config["read_threshold"]
