@@ -1,18 +1,12 @@
 import praw
-import pickle
+import json
 from models.comment import Comment
 
 
 class Reddit:
 
-    def __init__(self, user_agent, subreddit):
-        self.client = praw.Reddit(user_agent)
-        self.subreddit = self.client.subreddit(subreddit)
-
-        self.time_filter = "week"
-        self.post_limit = 50
-        self.comment_threshold = 50
-        self.char_limit = 9800
+    def __init__(self):
+        self.__read_config()
 
     def get_posts(self):
         posts = []
@@ -64,3 +58,21 @@ class Reddit:
 
         comments.append(table)
         return comments
+
+    def __read_config(self):
+        with open('configs/config.json') as config_file:
+
+            config = json.load(config_file)
+
+            self.reddit = praw.Reddit(client_id=config["client_id"],
+                                      client_secret=config["secret"],
+                                      user_agent=config["user_agent"],
+                                      username=config["username"],
+                                      password=config["password"])
+
+            self.subreddit = self.reddit.subreddit(config["subreddit"])
+
+            self.time_filter = config["time_filter"]
+            self.post_limit = config["post_limit"]
+            self.comment_threshold = config["comment_threshold"]
+            self.char_limit = config["char_limit"]
