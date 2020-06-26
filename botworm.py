@@ -1,3 +1,4 @@
+from datetime import datetime
 from utils.reddit import Reddit
 from utils.goodreads import Goodreads
 from utils.book_title_parser import BookTitleParser
@@ -13,9 +14,6 @@ def main():
     tracker = RecommendationTracker()
 
     for post in reddit.get_posts():
-
-        if tracker.post_exists(post):
-            continue
 
         tracker.track_post(post)
         lister = RecommendationLister()
