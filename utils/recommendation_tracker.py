@@ -36,8 +36,9 @@ class RecommendationTracker:
         post_exists = self.session.query(stmt).scalar()
         return post_exists
 
-    def date_of_most_recent_stored_comment(self, post_id):
-        pass
+    def date_of_most_recent_comment(self, post_id):
+        date = session.query(Comment).order_by(desc('date')).filter(Comment.post_id == post_id).first()
+        return date
 
     def number_of_comments_stored(self, post_id):
         pass

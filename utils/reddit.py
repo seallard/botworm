@@ -17,19 +17,26 @@ class Reddit:
         return posts
 
     def get_comments(self, post):
+
+        bot_comment = self.get_bot_comment(post)
+        if bot_comment:
+            filter_date = datetime.utcfromtimestamp(bot_comment.created_utc)
+        else:
+            filter_date = datetime(1989, 11, 9)
+
         comments = []
         for comment in post.comments.list():
 
             if hasattr(comment, "body"):
-
                 text = comment.body
                 author = comment.author
                 comment_id = comment.id
                 post_id = comment.submission.id
                 date = datetime.utcfromtimestamp(comment.created_utc)
 
-                comment = Comment(text, author, comment_id, post_id, date)
-                comments.append(comment)
+                if date > filter_date:
+                    comment = Comment(text, author, comment_id, post_id, date)
+                    comments.append(comment)
         return comments
 
     def post_comments(self, post, comments):
@@ -60,6 +67,16 @@ class Reddit:
         comments.append(table)
         return comments
 
+    def edit_table(self):
+        pass
+
+    def get_bot_comment(self, post):
+        for comment in post.comments:
+            if not comment.author:
+                continue
+            if comment.author.name == self.username:
+                return comment
+
     def __read_config(self):
         with open('configs/config.json') as config_file:
 
@@ -72,6 +89,7 @@ class Reddit:
                                       password=config["password"])
 
             self.subreddit = self.reddit.subreddit(config["subreddit"])
+            self.username = config["username"]
 
             self.time_filter = config["time_filter"]
             self.post_limit = config["post_limit"]
