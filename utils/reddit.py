@@ -8,7 +8,6 @@ class Reddit:
     def __init__(self, user_agent, subreddit):
         self.client = praw.Reddit(user_agent)
         self.subreddit = self.client.subreddit(subreddit)
-        self.post_ids = self.__get_previously_commented_posts()
 
         self.time_filter = "week"
         self.post_limit = 50
@@ -39,26 +38,11 @@ class Reddit:
         return comments
 
     def post_comments(self, post, comments):
-        post_id = post.id
         for comment in comments:
             post = post.reply(comment)
-        self.__update_previously_commented_posts(post_id)
-
-    def __get_previously_commented_posts(self):
-        try:
-            with open('post_ids', 'rb') as f:
-                post_ids = pickle.load(f)
-                return post_ids
-        except:
-            return []
-
-    def __update_previously_commented_posts(self, post_id):
-        self.post_ids.append(post_id)
-        with open('post_ids', 'wb') as f:
-            pickle.dump(self.post_ids, f)
 
     def __worth_checking(self, post):
-        return post.id not in self.post_ids and post.num_comments > self.comment_threshold
+        return post.num_comments > self.comment_threshold
 
     def create_table(self, recommendations):
 

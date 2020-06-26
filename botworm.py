@@ -13,6 +13,10 @@ def main():
     tracker = RecommendationTracker()
 
     for post in reddit.get_posts():
+
+        if tracker.post_exists(post):
+            continue
+
         tracker.track_post(post)
         lister = RecommendationLister()
 
