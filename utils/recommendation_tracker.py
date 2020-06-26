@@ -31,6 +31,11 @@ class RecommendationTracker:
         self.session.commit()
         self.session.close()
 
+    def post_exists(self, post):
+        stmt = exists().where(RedditPost.id==post.id)
+        post_exists = self.session.query(stmt).scalar()
+        return post_exists
+
     def date_of_most_recent_stored_comment(self, post_id):
         pass
 
