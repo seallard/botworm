@@ -8,7 +8,7 @@ class Comment(Base):
     __tablename__ = 'comments'
 
     id = Column(String, primary_key=True)
-    date = Date()
+    date = Column(Date)
     post_id = Column(String, ForeignKey('posts.id'))
 
     books = relationship("Book", secondary=comments_books_association, back_populates="comments")
