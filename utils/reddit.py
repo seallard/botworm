@@ -17,13 +17,6 @@ class Reddit:
         return posts
 
     def get_comments(self, post):
-
-        bot_comment = self.get_bot_comment(post)
-        if bot_comment:
-            filter_date = datetime.utcfromtimestamp(bot_comment.created_utc)
-        else:
-            filter_date = datetime(1989, 11, 9)
-
         comments = []
         for comment in post.comments.list():
 
@@ -34,14 +27,16 @@ class Reddit:
                 post_id = comment.submission.id
                 date = datetime.utcfromtimestamp(comment.created_utc)
 
-                if date > filter_date:
-                    comment = Comment(text, author, comment_id, post_id, date)
-                    comments.append(comment)
+                comment = Comment(text, author, comment_id, post_id, date)
+                comments.append(comment)
         return comments
 
     def post_comments(self, post, comments):
         for comment in comments:
             post = post.reply(comment)
+
+    def get_comment(self, comment_id):
+        return self.reddit.comment(id=comment_id)
 
     def __worth_checking(self, post):
         return post.num_comments > self.comment_threshold
@@ -66,16 +61,6 @@ class Reddit:
 
         comments.append(table)
         return comments
-
-    def edit_table(self):
-        pass
-
-    def get_bot_comment(self, post):
-        for comment in post.comments:
-            if not comment.author:
-                continue
-            if comment.author.name == self.username:
-                return comment
 
     def __read_config(self):
         with open('configs/config.json') as config_file:
