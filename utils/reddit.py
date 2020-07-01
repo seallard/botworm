@@ -34,6 +34,7 @@ class Reddit:
     def post_comments(self, post, comments):
         for comment in comments:
             post = post.reply(comment)
+            comment.id = post.id
 
     def get_comment(self, comment_id):
         return self.reddit.comment(id=comment_id)
@@ -41,25 +42,33 @@ class Reddit:
     def __worth_checking(self, post):
         return post.num_comments > self.comment_threshold
 
-    def create_table(self, recommendations):
-
-        comments = []
+    def create_tables(self, recommendations):
         table = ""
         message = "Here are some of the books mentioned in this thread on Goodreads:\n\n"
         table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
-
         table += message + table_header
+
+        comment_bodies = []
 
         for recommendation in recommendations:
 
             if len(table) > self.char_limit:
-                comments.append(table)
+                comment_bodies.append(table)
                 table = ""
                 table += table_header
 
             table += recommendation.to_string()
 
-        comments.append(table)
+        comment_bodies.append(table)
+
+        post_id = recommendation.comment.submission.id
+        comments = []
+
+        for text in comment_bodies:
+                date = datetime.utcnow()
+                comment = Comment(text, "", "", post_id , date)
+                comment.by_bot = True
+                comments.append(comment)
         return comments
 
     def __read_config(self):

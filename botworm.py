@@ -1,4 +1,3 @@
-from datetime import datetime
 from utils.reddit import Reddit
 from utils.goodreads import Goodreads
 from utils.book_title_parser import BookTitleParser
@@ -19,9 +18,9 @@ def main():
         lister = RecommendationLister()
 
         for comment in reddit.get_comments(post):
-            mentioned_books = title_parser.extract_titles(comment.text)
+            title_strings = title_parser.extract_titles(comment.text)
 
-            for title in mentioned_books:
+            for title in title_strings:
                 book = goodreads.get_book(title)
 
                 if book:
@@ -31,8 +30,9 @@ def main():
 
 
         recommendations = lister.get()
-        tables = reddit.create_table(recommendations)
+        bot_comments = reddit.create_tables(recommendations)
         #reddit.post_comments(post, tables)
+        [tracker.track_comment(comment) for comment in bot_comments]
 
 
 if __name__ == "__main__":
