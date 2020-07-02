@@ -48,6 +48,11 @@ class RecommendationTracker:
                     filter(Comment.by_bot == True).\
                     order_by(Comment.date.desc()).first()
 
+    def bot_has_commented(self, post_id):
+        if self.most_recent_comment_by_bot(post_id):
+            return True
+        return False
+
     def filter_posts(self, posts):
         filtered_posts = []
         for post in posts:
@@ -75,9 +80,7 @@ class RecommendationTracker:
         old = self.number_of_comments_stored(post.id)
         new = post.num_comments
 
-        if new/old >= self.new_comments_ratio:
-            return True
-        return False
+        return new/old >= self.new_comments_ratio
 
     def __comment_should_be_checked(self, comment):
         return not self.comment_exists(comment.id)

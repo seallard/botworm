@@ -29,15 +29,30 @@ def main():
                 book = goodreads.get_book(title)
 
                 if book:
+                    print("Added book: " + book.title)
                     comment.books.append(book)
 
             tracker.track_comment(comment)
 
-
         recommendations = lister.get()
-        bot_comments = reddit.create_tables(recommendations)
-        #reddit.post_comments(post, tables)
-        [tracker.track_comment(comment) for comment in bot_comments]
+
+        if recommendations != []:
+
+            if tracker.bot_has_commented(post.id):
+                bot_comment = tracker.most_recent_comment_by_bot(post.id)
+                rec_index = reddit.edit_table(bot_comment, recommendations)
+                remaining_recommendations = recommendations[rec_index:]
+
+                bot_comments = reddit.create_tables(remaining_recommendations)
+
+                praw_bot_comment = reddit.get_comment(bot_comment.id)
+                reddit.post_comments(praw_bot_comment, bot_comments)
+                [tracker.track_comment(comment) for comment in bot_comments]
+
+            else:
+                bot_comments = reddit.create_tables(recommendations)
+                reddit.post_comments(post, bot_comments)
+                [tracker.track_comment(comment) for comment in bot_comments]
 
 
 if __name__ == "__main__":
