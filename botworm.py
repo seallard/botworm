@@ -19,7 +19,6 @@ def main():
         tracker.track_post(post)
         lister = RecommendationLister()
 
-
         filtered_comments = tracker.filter_comments(reddit.get_comments(post))
 
         for comment in filtered_comments:
@@ -29,8 +28,8 @@ def main():
                 book = goodreads.get_book(title)
 
                 if book:
-                    print("Added book: " + book.title)
                     comment.books.append(book)
+                    lister.add(book, comment)
 
             tracker.track_comment(comment)
 

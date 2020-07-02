@@ -62,7 +62,7 @@ class Reddit:
 
         comment_bodies.append(table)
 
-        post_id = recommendations[0].comment.submission.id
+        post_id = recommendations[0].comment.post_id
         comments = []
 
         for text in comment_bodies:
