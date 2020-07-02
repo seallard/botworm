@@ -32,8 +32,9 @@ class Reddit:
         return comments
 
     def post_comments(self, post, comments):
+        """ Side effect: updates each comment with its id assigned by Reddit. """
         for comment in comments:
-            post = post.reply(comment)
+            post = post.reply(comment.text)
             comment.id = post.id
 
     def get_comment(self, comment_id):
@@ -61,7 +62,7 @@ class Reddit:
 
         comment_bodies.append(table)
 
-        post_id = recommendation.comment.submission.id
+        post_id = recommendations[0].comment.submission.id
         comments = []
 
         for text in comment_bodies:
@@ -69,6 +70,17 @@ class Reddit:
             comment = Comment(text, self.username, "", post_id , date, True)
             comments.append(comment)
         return comments
+
+    def edit_table(self, comment, recommendations):
+        bot_comment = self.get_comment(comment.id)
+        table = bot_comment.body
+
+        table_entry_counter = 0
+        for recommendation in recommendations:
+            table += recommendation.to_string()
+            table_entry_counter += 1
+        bot_comment.edit(table)
+        return table_entry_counter
 
     def __read_config(self):
         with open('configs/config.json') as config_file:
