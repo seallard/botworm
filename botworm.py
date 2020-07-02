@@ -12,12 +12,17 @@ def main():
     title_parser = BookTitleParser()
     tracker = RecommendationTracker()
 
-    for post in reddit.get_posts():
+    filtered_posts = tracker.filter_posts(reddit.get_posts())
+
+    for post in filtered_posts:
 
         tracker.track_post(post)
         lister = RecommendationLister()
 
-        for comment in reddit.get_comments(post):
+
+        filtered_comments = tracker.filter_comments(reddit.get_comments(post))
+
+        for comment in filtered_comments:
             title_strings = title_parser.extract_titles(comment.text)
 
             for title in title_strings:

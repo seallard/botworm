@@ -65,10 +65,9 @@ class Reddit:
         comments = []
 
         for text in comment_bodies:
-                date = datetime.utcnow()
-                comment = Comment(text, "", "", post_id , date)
-                comment.by_bot = True
-                comments.append(comment)
+            date = datetime.utcnow()
+            comment = Comment(text, self.username, "", post_id , date, True)
+            comments.append(comment)
         return comments
 
     def __read_config(self):
