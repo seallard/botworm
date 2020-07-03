@@ -37,13 +37,15 @@ class Goodreads:
         if number_of_hits == 0:
             return None
 
-        book = self.__extract_books(json)
+        books = self.__extract_books(json)
+        best_hit = books[0]
 
-        if number_of_hits > 1:
-            book = book[0] # Goodreads sorts the hits by popularity
+        for book in books:
+            if int(book["ratings_count"]["#text"]) > int(best_hit["ratings_count"]["#text"]):
+                best_hit = book
 
-        if self.__valid(book):
-            return book
+        if self.__valid(best_hit):
+            return best_hit
 
     def __number_of_hits(self, json):
         return int(json["GoodreadsResponse"]["search"]["total-results"])
@@ -60,7 +62,10 @@ class Goodreads:
 
     def __extract_books(self, json):
         """ Extract the list of books from the json response. """
-        return json['GoodreadsResponse']['search']['results']['work']
+        books = json['GoodreadsResponse']['search']['results']['work']
+        if not type(books) is list:
+            books = [books]
+        return books
 
     def __create_book_object(self, book_dict):
         """ Create a book object from the dictionary. """
