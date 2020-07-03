@@ -11,3 +11,6 @@ To build and run the bot:
 docker build -t botworm .
 docker run botworm
 ```
+
+## Database
+<img src="database_design.PNG" width="600" heigth="200">
