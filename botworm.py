@@ -42,11 +42,13 @@ def main():
                 rec_index = reddit.edit_table(bot_comment, recommendations)
                 remaining_recommendations = recommendations[rec_index:]
 
-                bot_comments = reddit.create_tables(remaining_recommendations)
+                if remaining_recommendations != []:
 
-                praw_bot_comment = reddit.get_comment(bot_comment.id)
-                reddit.post_comments(praw_bot_comment, bot_comments)
-                [tracker.track_comment(comment) for comment in bot_comments]
+                    bot_comments = reddit.create_tables(remaining_recommendations)
+
+                    praw_bot_comment = reddit.get_comment(bot_comment.id)
+                    reddit.post_comments(praw_bot_comment, bot_comments)
+                    [tracker.track_comment(comment) for comment in bot_comments]
 
             else:
                 bot_comments = reddit.create_tables(recommendations)
