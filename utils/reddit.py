@@ -41,7 +41,7 @@ class Reddit:
         return self.reddit.comment(id=comment_id)
 
     def __worth_checking(self, post):
-        return post.num_comments > self.comment_threshold
+        return post.num_comments > self.comment_threshold and not post.locked
 
     def create_tables(self, recommendations):
         table = ""
