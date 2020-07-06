@@ -80,7 +80,7 @@ class RecommendationTracker:
         old = self.number_of_comments_stored(post.id)
         new = post.num_comments
 
-        return new/old >= self.new_comments_ratio
+        return new - old >= self.min_new_comments
 
     def __comment_should_be_checked(self, comment):
         return not self.comment_exists(comment.id)
@@ -88,4 +88,4 @@ class RecommendationTracker:
     def __read_config(self):
         with open('configs/config.json') as config_file:
                 config = json.load(config_file)
-                self.new_comments_ratio = config["new_comments_ratio"]
+                self.min_new_comments = config["min_new_comments "]
