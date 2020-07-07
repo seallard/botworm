@@ -45,7 +45,7 @@ class Reddit:
 
     def create_tables(self, recommendations):
         table = ""
-        message = "Here are some of the books mentioned in this thread on Goodreads:\n\n"
+        message = "Hi, I'm a bot. Here are some of the books mentioned in this thread on Goodreads:\n\n"
         table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
         table += message + table_header
 
