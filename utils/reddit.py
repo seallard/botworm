@@ -43,10 +43,14 @@ class Reddit:
     def __worth_checking(self, post):
         return post.num_comments > self.comment_threshold and not post.locked
 
-    def create_tables(self, recommendations):
+    def create_tables(self, recommendations, include_greeting):
         table = ""
-        message = "Hi, I'm a bot. Here are some of the books mentioned in this thread on Goodreads:\n\n"
         table_header = "Title | Author | Reads | Rating | Comment\n :--|:--|:--|:--|:--\n"
+        message = ""
+
+        if include_greeting:
+            message = "Hi, I'm a bot. Here are some of the books mentioned in this thread on Goodreads:\n\n"
+
         table += message + table_header
 
         comment_bodies = []

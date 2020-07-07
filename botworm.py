@@ -44,14 +44,14 @@ def main():
 
                 if remaining_recommendations != []:
 
-                    bot_comments = reddit.create_tables(remaining_recommendations)
+                    bot_comments = reddit.create_tables(remaining_recommendations, False)
 
                     praw_bot_comment = reddit.get_comment(bot_comment.id)
                     reddit.post_comments(praw_bot_comment, bot_comments)
                     [tracker.track_comment(comment) for comment in bot_comments]
 
             else:
-                bot_comments = reddit.create_tables(recommendations)
+                bot_comments = reddit.create_tables(recommendations, True)
                 reddit.post_comments(post, bot_comments)
                 [tracker.track_comment(comment) for comment in bot_comments]
 
