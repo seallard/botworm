@@ -77,6 +77,8 @@ class Reddit:
 
         table_entry_counter = 0
         for recommendation in recommendations:
+            if len(table) > self.char_limit:
+                break
             table += recommendation.to_string()
             table_entry_counter += 1
         bot_comment.edit(table)
